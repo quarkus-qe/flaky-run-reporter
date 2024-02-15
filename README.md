@@ -26,7 +26,7 @@ You may want to summarize past flaky run reports into one report:
 
 ```bash
 jbang trust add https://raw.githubusercontent.com/quarkus-qe/flaky-run-reporter
-jbang https://raw.githubusercontent.com/quarkus-qe/flaky-run-reporter/main/jbang-scripts/FlakyTestRunSummarizer.java day-retention=30 max-flakes-per-test=50
+jbang https://raw.githubusercontent.com/quarkus-qe/flaky-run-reporter/main/jbang-scripts/FlakyTestRunSummarizer.java day-retention=30 max-flakes-per-test=50 summary-report-path=./summary.json new-build-report-path=./new.json
 ```
 
 Please note that script arguments are optional.
