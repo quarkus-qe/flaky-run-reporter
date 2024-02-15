@@ -39,7 +39,8 @@ public class FlakyRunReporter {
             return List.of();
         }
         try {
-            return OBJECT_MAPPER.readValue(reportPath.toFile(), new TypeReference<>() {});
+            return OBJECT_MAPPER.readValue(reportPath.toFile(), new TypeReference<>() {
+            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -50,9 +51,7 @@ public class FlakyRunReporter {
     }
 
     private static List<FlakyTest> buildReportToFlakyTests(BuildReport buildReport) {
-        return buildReport
-                .getProjectReports()
-                .stream()
+        return buildReport.getProjectReports().stream()
                 .flatMap(projectReport -> testDirsToFlakyTests(toTestDirs(projectReport), projectReport)).toList();
     }
 
@@ -79,24 +78,18 @@ public class FlakyRunReporter {
     }
 
     private static List<File> toTestDirs(ProjectReport projectReport) {
-        return Stream.of(Path.of(normalizeModuleName(projectReport.getBasedir())))
-                .flatMap(baseDir -> Stream.of(baseDir.resolve(MAVEN_FAILSAFE_REPORTS_PATH),
-                        baseDir.resolve(MAVEN_SUREFIRE_REPORTS_PATH)))
-                .filter(Files::exists)
-                .map(Path::toFile)
-                .toList();
+        return Stream
+                .of(Path.of(normalizeModuleName(projectReport.getBasedir()))).flatMap(baseDir -> Stream
+                        .of(baseDir.resolve(MAVEN_FAILSAFE_REPORTS_PATH), baseDir.resolve(MAVEN_SUREFIRE_REPORTS_PATH)))
+                .filter(Files::exists).map(Path::toFile).toList();
     }
 
     private static Stream<FlakyTest> testDirsToFlakyTests(List<File> testDirs, ProjectReport projectReport) {
         if (testDirs.isEmpty()) {
             return Stream.empty();
         }
-        return new SurefireReportParser(testDirs, new NullConsoleLogger())
-                .parseXMLReportFiles()
-                .stream()
-                .filter(r -> r.getNumberOfFlakes() > 0)
-                .map(ReportTestSuite::getTestCases)
-                .flatMap(Collection::stream)
+        return new SurefireReportParser(testDirs, new NullConsoleLogger()).parseXMLReportFiles().stream()
+                .filter(r -> r.getNumberOfFlakes() > 0).map(ReportTestSuite::getTestCases).flatMap(Collection::stream)
                 .filter(ReportTestCase::hasFlakes)
                 .flatMap(reportTestCase -> FlakyTest.newInstances(reportTestCase, projectReport));
     }

@@ -18,6 +18,9 @@
         <maven-surefire-report-parser.version>3.2.5</maven-surefire-report-parser.version>
         <plexus-containers.version>2.2.0</plexus-containers.version>
         <jackson-databind.version>2.16.1</jackson-databind.version>
+        <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
+        <!-- Format Settings -->
+        <src.format.goal>format</src.format.goal>
     </properties>
 
     <dependencies>
@@ -60,6 +63,21 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>${formatter-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>${src.format.goal}</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <lineEnding>LF</lineEnding>
+                </configuration>
             </plugin>
         </plugins>
     </build>
