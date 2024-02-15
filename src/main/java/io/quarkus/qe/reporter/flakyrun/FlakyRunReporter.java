@@ -1,5 +1,6 @@
 package io.quarkus.qe.reporter.flakyrun;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.quarkus.bot.build.reporting.model.BuildReport;
@@ -32,7 +33,19 @@ public class FlakyRunReporter {
         this.logger = logger;
     }
 
-    void createFlakyRunReport() {
+    public static List<FlakyTest> parseFlakyTestsReport(String reportPathStr) {
+        Path reportPath = Path.of(reportPathStr);
+        if (!Files.exists(reportPath)) {
+            return List.of();
+        }
+        try {
+            return OBJECT_MAPPER.readValue(reportPath.toFile(), new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createFlakyRunReport() {
         createFlakyRunReport(buildReportToFlakyTests(getBuildReporter()));
     }
 
