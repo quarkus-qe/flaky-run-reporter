@@ -1,5 +1,6 @@
-package io.quarkus.qe.reporter.flakyrun;
+package io.quarkus.qe.reporter.flakyrun.mavenextension;
 
+import io.quarkus.qe.reporter.flakyrun.reporter.FlakyRunReporter;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenSession;
 import org.codehaus.plexus.component.annotations.Component;

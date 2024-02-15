@@ -1,4 +1,4 @@
-package io.quarkus.qe.reporter.flakyrun;
+package io.quarkus.qe.reporter.flakyrun.reporter;
 
 import io.quarkus.bot.build.reporting.model.ProjectReport;
 import org.apache.maven.plugins.surefire.report.ReportTestCase;

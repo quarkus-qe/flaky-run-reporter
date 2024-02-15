@@ -1,4 +1,4 @@
-package io.quarkus.qe.reporter.flakyrun;
+package io.quarkus.qe.reporter.flakyrun.reporter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +29,7 @@ public class FlakyRunReporter {
     private static final Path MAVEN_FAILSAFE_REPORTS_PATH = Path.of(TARGET_DIR, "failsafe-reports");
     private final Logger logger;
 
-    FlakyRunReporter(Logger logger) {
+    public FlakyRunReporter(Logger logger) {
         this.logger = logger;
     }
 
