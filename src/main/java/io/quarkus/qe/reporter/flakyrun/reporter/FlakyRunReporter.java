@@ -33,8 +33,7 @@ public class FlakyRunReporter {
         this.logger = logger;
     }
 
-    public static List<FlakyTest> parseFlakyTestsReport(String reportPathStr) {
-        Path reportPath = Path.of(reportPathStr);
+    public static List<FlakyTest> parseFlakyTestsReport(Path reportPath) {
         if (!Files.exists(reportPath)) {
             return List.of();
         }

@@ -26,8 +26,19 @@ You may want to summarize past flaky run reports into one report:
 
 ```bash
 jbang trust add https://raw.githubusercontent.com/quarkus-qe/flaky-run-reporter
-jbang https://raw.githubusercontent.com/quarkus-qe/flaky-run-reporter/main/jbang-scripts/FlakyTestRunSummarizer.java day-retention=30 max-flakes-per-test=50 summary-report-path=./summary.json new-build-report-path=./new.json
+jbang https://raw.githubusercontent.com/quarkus-qe/flaky-run-reporter/main/jbang-scripts/FlakyTestRunSummarizer.java day-retention=30 new-flaky-report-path=target/flaky-run-report.json
 ```
+Following script arguments are supported:
 
-Please note that script arguments are optional.
-We set sensible defaults for you.
+| Argument name                | Argument description                               | Default value               |
+|------------------------------|----------------------------------------------------|-----------------------------|
+| day-retention                | Max days flaky results are kept                    | 30                          |
+| max-flakes-per-test          | Max flaky results per one flaky test               | 50                          |
+| previous-summary-report-path | Path to a previous summary report                  | ./flaky-summary-report.json |
+| new-flaky-report-path        | Path to the latest flaky report added to a summary | ./flaky-run-report.json     |
+| flaky-report-ci-job-name     | Jenkins job name or GitHub action name             | \<\<empty>>                 |
+| flaky-report-ci-build-number | Jenkins job or GitHub action build number          | \<\<empty>>                 |
+| new-summary-report-path      | Jenkins job or GitHub action build number          | ./flaky-summary-report.json |
+
+Please note that all script arguments are optional.
+The JBang script requires new flaky report to exist, as the whole point of the script is to add new report to a summary.
