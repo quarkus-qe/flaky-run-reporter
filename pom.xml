@@ -13,7 +13,6 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <build-reporter-maven-extension.version>3.4.4</build-reporter-maven-extension.version>
         <maven-core.version>3.9.6</maven-core.version>
         <maven-surefire-report-parser.version>3.2.5</maven-surefire-report-parser.version>
         <plexus-containers.version>2.2.0</plexus-containers.version>
@@ -24,11 +23,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>io.quarkus.bot</groupId>
-            <artifactId>build-reporter-maven-extension-model</artifactId>
-            <version>${build-reporter-maven-extension.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
