@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.quarkus.qe</groupId>
     <artifactId>flaky-run-reporter</artifactId>
     <name>Flaky Run Reporter - Maven Extension</name>
-    <version>0.1.1.Beta1-SNAPSHOT</version>
+    <version>0.1.1.Beta1</version>
     <packaging>jar</packaging>
     <description>Creates report on flaky tests detected during SureFire and FailSafe test runs</description>
 
@@ -168,7 +166,7 @@
         <connection>scm:git:git@github.com:quarkus-qe/flaky-run-reporter.git</connection>
         <developerConnection>scm:git:git@github.com:quarkus-qe/flaky-run-reporter.git</developerConnection>
         <url>https://github.com/quarkus-qe/flaky-run-reporter</url>
-        <tag>HEAD</tag>
+        <tag>0.1.1.Beta1</tag>
     </scm>
     <url>https://github.com/quarkus-qe/flaky-run-reporter/</url>
 
