@@ -3,8 +3,6 @@ package io.quarkus.qe.reporter.flakyrun.reporter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.quarkus.bot.build.reporting.model.BuildReport;
-import io.quarkus.bot.build.reporting.model.ProjectReport;
 import org.apache.maven.plugin.surefire.log.api.NullConsoleLogger;
 import org.apache.maven.plugins.surefire.report.ReportTestCase;
 import org.apache.maven.plugins.surefire.report.ReportTestSuite;
@@ -23,7 +21,6 @@ import java.util.stream.Stream;
 public class FlakyRunReporter {
     public static final String FLAKY_RUN_REPORT = "flaky-run-report.json";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    private static final String BUILD_REPORT_JSON_FILENAME = "build-report.json";
     private static final String TARGET_DIR = "target";
     private static final Path MAVEN_SUREFIRE_REPORTS_PATH = Path.of(TARGET_DIR, "surefire-reports");
     private static final Path MAVEN_FAILSAFE_REPORTS_PATH = Path.of(TARGET_DIR, "failsafe-reports");
@@ -45,13 +42,12 @@ public class FlakyRunReporter {
         }
     }
 
-    public void createFlakyRunReport() {
-        createFlakyRunReport(buildReportToFlakyTests(getBuildReporter()));
+    public void createReport(List<Project> projects) {
+        createFlakyRunReport(projectsToFlakyTests(projects));
     }
 
-    private static List<FlakyTest> buildReportToFlakyTests(BuildReport buildReport) {
-        return buildReport.getProjectReports().stream()
-                .flatMap(projectReport -> testDirsToFlakyTests(toTestDirs(projectReport), projectReport)).toList();
+    private static List<FlakyTest> projectsToFlakyTests(List<Project> projects) {
+        return projects.stream().flatMap(project -> testDirsToFlakyTests(toTestDirs(project), project)).toList();
     }
 
     private void createFlakyRunReport(List<FlakyTest> flakyTests) {
@@ -64,36 +60,18 @@ public class FlakyRunReporter {
         }
     }
 
-    private static BuildReport getBuildReporter() {
-        var buildReportPath = Path.of(TARGET_DIR).resolve(BUILD_REPORT_JSON_FILENAME);
-        if (Files.exists(buildReportPath)) {
-            try {
-                return OBJECT_MAPPER.readValue(buildReportPath.toFile(), BuildReport.class);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return new BuildReport();
+    private static List<File> toTestDirs(Project project) {
+        return Stream.of(project.baseDir()).flatMap(baseDir -> Stream.of(baseDir.resolve(MAVEN_FAILSAFE_REPORTS_PATH),
+                baseDir.resolve(MAVEN_SUREFIRE_REPORTS_PATH))).filter(Files::exists).map(Path::toFile).toList();
     }
 
-    private static List<File> toTestDirs(ProjectReport projectReport) {
-        return Stream
-                .of(Path.of(normalizeModuleName(projectReport.getBasedir()))).flatMap(baseDir -> Stream
-                        .of(baseDir.resolve(MAVEN_FAILSAFE_REPORTS_PATH), baseDir.resolve(MAVEN_SUREFIRE_REPORTS_PATH)))
-                .filter(Files::exists).map(Path::toFile).toList();
-    }
-
-    private static Stream<FlakyTest> testDirsToFlakyTests(List<File> testDirs, ProjectReport projectReport) {
+    private static Stream<FlakyTest> testDirsToFlakyTests(List<File> testDirs, Project project) {
         if (testDirs.isEmpty()) {
             return Stream.empty();
         }
         return new SurefireReportParser(testDirs, new NullConsoleLogger()).parseXMLReportFiles().stream()
                 .filter(r -> r.getNumberOfFlakes() > 0).map(ReportTestSuite::getTestCases).flatMap(Collection::stream)
                 .filter(ReportTestCase::hasFlakes)
-                .flatMap(reportTestCase -> FlakyTest.newInstances(reportTestCase, projectReport));
-    }
-
-    private static String normalizeModuleName(String moduleName) {
-        return moduleName.replace('\\', '/');
+                .flatMap(reportTestCase -> FlakyTest.newInstances(reportTestCase, project));
     }
 }
