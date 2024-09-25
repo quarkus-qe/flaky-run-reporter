@@ -41,10 +41,10 @@ jobs:
       - name: Maven release ${{steps.metadata.outputs.current-version}}
         run: |
           git checkout -b release
-          mvn -B release:prepare -Prelease,framework,extensions,examples -DautoVersionSubmodules -DreleaseVersion=${{steps.metadata.outputs.current-version}} -DdevelopmentVersion=${{steps.metadata.outputs.next-version}}-SNAPSHOT -s maven-settings.xml
+          mvn -B release:prepare -DskipITs -DskipTests -Prelease -DautoVersionSubmodules -DreleaseVersion=${{steps.metadata.outputs.current-version}} -DdevelopmentVersion=${{steps.metadata.outputs.next-version}}-SNAPSHOT
           git checkout ${{github.base_ref}}
           git rebase release
-          mvn -B release:perform -DskipITs -DskipTests -Prelease,framework -s maven-settings.xml
+          mvn -B release:perform -DskipITs -DskipTests -Prelease
       - name: Bump dependency version used in JBang scripts to the released version
         run: |
           sed -i "s#DEPS io.quarkus.qe:flaky-run-reporter:.*#DEPS io.quarkus.qe:flaky-run-reporter:${{steps.metadata.outputs.current-version}}#" ./jbang-scripts/FlakyTestRunSummarizer.java
