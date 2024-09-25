@@ -47,7 +47,7 @@ jobs:
           mvn -B release:prepare -Prelease,framework,extensions,examples -DautoVersionSubmodules -DreleaseVersion=${{steps.metadata.outputs.current-version}} -DdevelopmentVersion=${{steps.metadata.outputs.next-version}} -s maven-settings.xml
           git checkout ${{github.base_ref}}
           git rebase release
-          mvn -B release:perform -DskipITs -Prelease,framework -s maven-settings.xml
+          mvn -B release:perform -DskipITs -DskipTests -Prelease,framework -s maven-settings.xml
       - name: Bump dependency version used in JBang script to the released version
         run: |
           sed -i "s#DEPS io.quarkus.qe:flaky-run-reporter:.*#DEPS io.quarkus.qe:flaky-run-reporter:${{steps.metadata.outputs.current-version}}#" ./jbang-scripts/FlakyTestRunSummarizer.java
