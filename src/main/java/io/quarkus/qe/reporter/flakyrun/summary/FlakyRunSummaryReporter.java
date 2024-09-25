@@ -17,6 +17,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.quarkus.qe.reporter.flakyrun.FlakyReporterUtils.isArgument;
+import static io.quarkus.qe.reporter.flakyrun.FlakyReporterUtils.parseIntArgument;
+import static io.quarkus.qe.reporter.flakyrun.FlakyReporterUtils.parseStringArgument;
 import static java.util.stream.Collectors.groupingBy;
 
 public class FlakyRunSummaryReporter {
@@ -30,7 +33,6 @@ public class FlakyRunSummaryReporter {
     private static final String PREVIOUS_SUMMARY_REPORT_PATH = "previous-summary-report-path";
     private static final String NEW_SUMMARY_REPORT_PATH = "new-summary-report-path";
     private static final String NEW_FLAKY_REPORT_PATH = "new-flaky-report-path";
-    private static final String EQUALS = "=";
     private static final String CI_JOB_NAME = "flaky-report-ci-job-name";
     private final int dayRetention;
     private final int maxFlakesPerTest;
@@ -201,17 +203,5 @@ public class FlakyRunSummaryReporter {
             }
         }
         return null;
-    }
-
-    private static boolean isArgument(String argumentKey, String argument) {
-        return argument.startsWith(argumentKey + EQUALS);
-    }
-
-    private static int parseIntArgument(String argumentKey, String argument) {
-        return Integer.parseInt(argument.substring((argumentKey + EQUALS).length()));
-    }
-
-    private static String parseStringArgument(String argumentKey, String argument) {
-        return argument.substring((argumentKey + EQUALS).length());
     }
 }
