@@ -1,6 +1,6 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 
-//DEPS io.quarkus.qe:flaky-run-reporter:0.1.2.Beta1
+//DEPS io.quarkus.qe:flaky-run-reporter:0.1.3
 
 import io.quarkus.qe.reporter.flakyrun.commentator.CreateGhPrComment;
 
