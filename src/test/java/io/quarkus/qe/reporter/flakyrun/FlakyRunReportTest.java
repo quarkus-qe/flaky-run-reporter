@@ -1,5 +1,6 @@
 package io.quarkus.qe.reporter.flakyrun;
 
+import io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
@@ -21,6 +22,11 @@ import java.util.Objects;
 import java.util.Properties;
 
 import static io.quarkus.qe.reporter.flakyrun.reporter.FlakyRunReporter.FLAKY_RUN_REPORT;
+import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.CI_BUILD_NUMBER;
+import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.DAY_RETENTION;
+import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.FLAKY_SUMMARY_REPORT;
+import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.TEST_BASE_DIR;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FlakyRunReportTest {
@@ -47,10 +53,34 @@ public class FlakyRunReportTest {
         }
 
         assertGeneratedFlakyRunReport();
+        assertFlakyRunSummary();
+    }
+
+    private void assertFlakyRunSummary() throws IOException {
+        // use old summary I downloaded from Jenkins, if format changes, it needs to change as well
+        var oldSummary = new File("src/test/resources/flaky-summary-report.json");
+        var summaryTarget = new File(TARGET_FLAKY_TEST_DIR, "target/" + FLAKY_SUMMARY_REPORT);
+        FileUtils.copyFile(oldSummary, summaryTarget);
+        var previousValue = Files.readString(summaryTarget.toPath());
+        assertTrue(previousValue.contains("PicocliDevIT.verifyGreetingCommandOutputsExpectedMessage"), previousValue);
+        assertFalse(previousValue.contains("FlakyTest.testFlaky"), previousValue);
+
+        System.setProperty(TEST_BASE_DIR, getFlakyRunReportFile().getParent());
+        // making it maximal day retention because the old message needs to be valid for this test to pass
+        var expectedBuildNumber = "987654321";
+        new FlakyRunSummaryReporter(
+                new String[] { CI_BUILD_NUMBER + "=" + expectedBuildNumber, DAY_RETENTION + "=" + Integer.MAX_VALUE })
+                        .createReport();
+
+        // now assert the old summary and new flaky run report were merged
+        var newValue = Files.readString(summaryTarget.toPath());
+        assertTrue(newValue.contains("PicocliDevIT.verifyGreetingCommandOutputsExpectedMessage"), newValue);
+        assertTrue(newValue.contains("FlakyTest.testFlaky"), newValue);
+        assertTrue(newValue.contains(expectedBuildNumber), newValue);
     }
 
     private static void assertGeneratedFlakyRunReport() throws IOException {
-        var flakyRunReport = new File(TARGET_FLAKY_TEST_DIR, "target/" + FLAKY_RUN_REPORT);
+        var flakyRunReport = getFlakyRunReportFile();
         assertTrue(flakyRunReport.exists(),
                 "Flaky Run report wasn't generated, '%s' does not exist".formatted(flakyRunReport));
         var reportContent = Files.readString(flakyRunReport.toPath());
@@ -61,6 +91,10 @@ public class FlakyRunReportTest {
         assertReportContent(reportContent, "failureStackTrace");
         assertReportContent(reportContent, "FlakyTest.java:18"); // part of the stacktrace
         assertReportContent(reportContent, "dateTime");
+    }
+
+    private static File getFlakyRunReportFile() {
+        return new File(TARGET_FLAKY_TEST_DIR, "target/" + FLAKY_RUN_REPORT);
     }
 
     private static void assertReportContent(String reportContent, String expectedPortion) {
