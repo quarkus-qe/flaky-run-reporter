@@ -15,8 +15,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-core.version>3.9.9</maven-core.version>
         <maven-surefire-report-parser.version>3.5.0</maven-surefire-report-parser.version>
-        <plexus-containers.version>2.2.0</plexus-containers.version>
         <jackson-databind.version>2.17.0</jackson-databind.version>
+        <sisu-plugin.version>0.9.0.M3</sisu-plugin.version>
         <formatter-maven-plugin.version>2.24.1</formatter-maven-plugin.version>
         <!-- Format Settings -->
         <src.format.goal>format</src.format.goal>
@@ -31,11 +31,7 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
             <version>${maven-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-component-annotations</artifactId>
-            <version>${plexus-containers.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -64,14 +60,15 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-component-metadata</artifactId>
-                <!-- FIXME: replace this deprecated dependency -->
-                <version>2.2.0</version>
+                <groupId>org.eclipse.sisu</groupId>
+                <artifactId>sisu-maven-plugin</artifactId>
+                <version>${sisu-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>generate-index</id>
                         <goals>
-                            <goal>generate-metadata</goal>
+                            <goal>main-index</goal>
+                            <goal>test-index</goal>
                         </goals>
                     </execution>
                 </executions>

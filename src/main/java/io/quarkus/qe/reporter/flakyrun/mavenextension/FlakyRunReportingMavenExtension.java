@@ -4,18 +4,20 @@ import io.quarkus.qe.reporter.flakyrun.reporter.FlakyRunReporter;
 import io.quarkus.qe.reporter.flakyrun.reporter.Project;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.execution.MavenSession;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.Logger;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.List;
 
-@Component(role = AbstractMavenLifecycleParticipant.class, hint = "quarkus-qe-flaky-run-reporter")
+@Singleton
+@Named("quarkus-qe-flaky-run-reporter")
 public class FlakyRunReportingMavenExtension extends AbstractMavenLifecycleParticipant {
 
-    @Requirement
-    private Logger logger;
+    @Inject
+    public Logger logger;
 
     @Override
     public void afterSessionEnd(MavenSession session) {
