@@ -45,6 +45,10 @@ jobs:
           git checkout ${{github.base_ref}}
           git rebase release
           mvn -B release:perform -DskipITs -DskipTests -Prelease
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Bump dependency version used in JBang scripts to the released version
         run: |
           sed -i "s#DEPS io.quarkus.qe:flaky-run-reporter:.*#DEPS io.quarkus.qe:flaky-run-reporter:${{steps.metadata.outputs.current-version}}#" ./jbang-scripts/FlakyTestRunSummarizer.java
