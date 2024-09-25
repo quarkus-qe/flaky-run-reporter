@@ -1,5 +1,6 @@
 package io.quarkus.qe.reporter.flakyrun;
 
+import io.quarkus.qe.reporter.flakyrun.commentator.CreateGhPrComment;
 import io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
@@ -21,11 +22,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+import static io.quarkus.qe.reporter.flakyrun.FlakyReporterUtils.createCommandArgs;
+import static io.quarkus.qe.reporter.flakyrun.FlakyReporterUtils.readFile;
+import static io.quarkus.qe.reporter.flakyrun.commentator.CreateGhPrComment.FLAKY_REPORTS_FILE_PREFIX_KEY;
+import static io.quarkus.qe.reporter.flakyrun.commentator.CreateGhPrComment.OVERVIEW_FILE_KEY;
 import static io.quarkus.qe.reporter.flakyrun.reporter.FlakyRunReporter.FLAKY_RUN_REPORT;
 import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.CI_BUILD_NUMBER;
 import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.DAY_RETENTION;
 import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.FLAKY_SUMMARY_REPORT;
-import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.TEST_BASE_DIR;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,9 +58,47 @@ public class FlakyRunReportTest {
 
         assertGeneratedFlakyRunReport();
         assertFlakyRunSummary();
+        assertGitHubPrCommentator();
     }
 
-    private void assertFlakyRunSummary() throws IOException {
+    private static void assertGitHubPrCommentator() throws IOException {
+        var testTarget = getFlakyRunReportFile().toPath().getParent();
+        System.setProperty(CreateGhPrComment.TEST_BASE_DIR, testTarget.toString());
+
+        // prepare overview
+        var overview = new File("src/test/resources/overview_file.txt");
+        var overviewInTestTarget = new File(TARGET_FLAKY_TEST_DIR, "target/" + overview.getName());
+        FileUtils.copyFile(overview, overviewInTestTarget);
+        assertFalse(readFile(overviewInTestTarget.toPath()).isBlank());
+
+        // prepare flaky run reports
+        var expectedReportPrefix = "flaky-run-report-";
+        var newFlakyRunReportFile1 = testTarget.resolve(expectedReportPrefix + "whatever-1").toFile();
+        var newFlakyRunReportFile2 = testTarget.resolve(expectedReportPrefix + "whatever-2").toFile();
+        FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile1);
+        FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile2);
+
+        // prepare comment
+        var commentator = new CreateGhPrComment(createCommandArgs(OVERVIEW_FILE_KEY, overview.getName(),
+                FLAKY_REPORTS_FILE_PREFIX_KEY, expectedReportPrefix));
+        var comment = commentator.getComment();
+
+        // assert comment
+        assertTrue(
+                comment.contains(
+                        "Artifact `%s` contains following failures:".formatted(newFlakyRunReportFile1.getName())),
+                comment);
+        assertTrue(
+                comment.contains(
+                        "Artifact `%s` contains following failures:".formatted(newFlakyRunReportFile2.getName())),
+                comment);
+        assertTrue(comment.contains("Failure message: `failing to test flakiness reporting`"), comment);
+        assertTrue(comment.contains("Failure stacktrace:"), comment);
+        assertTrue(comment.contains("org.opentest4j.AssertionFailedError: failing to test flakiness reporting"),
+                comment);
+    }
+
+    private static void assertFlakyRunSummary() throws IOException {
         // use old summary I downloaded from Jenkins, if format changes, it needs to change as well
         var oldSummary = new File("src/test/resources/flaky-summary-report.json");
         var summaryTarget = new File(TARGET_FLAKY_TEST_DIR, "target/" + FLAKY_SUMMARY_REPORT);
@@ -65,11 +107,11 @@ public class FlakyRunReportTest {
         assertTrue(previousValue.contains("PicocliDevIT.verifyGreetingCommandOutputsExpectedMessage"), previousValue);
         assertFalse(previousValue.contains("FlakyTest.testFlaky"), previousValue);
 
-        System.setProperty(TEST_BASE_DIR, getFlakyRunReportFile().getParent());
+        System.setProperty(FlakyRunSummaryReporter.TEST_BASE_DIR, getFlakyRunReportFile().getParent());
         // making it maximal day retention because the old message needs to be valid for this test to pass
         var expectedBuildNumber = "987654321";
         new FlakyRunSummaryReporter(
-                new String[] { CI_BUILD_NUMBER + "=" + expectedBuildNumber, DAY_RETENTION + "=" + Integer.MAX_VALUE })
+                createCommandArgs(CI_BUILD_NUMBER, expectedBuildNumber, DAY_RETENTION, Integer.MAX_VALUE + ""))
                         .createReport();
 
         // now assert the old summary and new flaky run report were merged

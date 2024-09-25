@@ -48,10 +48,11 @@ jobs:
           git checkout ${{github.base_ref}}
           git rebase release
           mvn -B release:perform -DskipITs -DskipTests -Prelease,framework -s maven-settings.xml
-      - name: Bump dependency version used in JBang script to the released version
+      - name: Bump dependency version used in JBang scripts to the released version
         run: |
           sed -i "s#DEPS io.quarkus.qe:flaky-run-reporter:.*#DEPS io.quarkus.qe:flaky-run-reporter:${{steps.metadata.outputs.current-version}}#" ./jbang-scripts/FlakyTestRunSummarizer.java
-          git commit -am "Update JBang script dependency version to ${{steps.metadata.outputs.current-version}}"
+          sed -i "s#DEPS io.quarkus.qe:flaky-run-reporter:.*#DEPS io.quarkus.qe:flaky-run-reporter:${{steps.metadata.outputs.current-version}}#" ./jbang-scripts/GitHubPrCommentator.java
+          git commit -am "Update JBang scripts dependency version to ${{steps.metadata.outputs.current-version}}"
       - name: Push changes to ${{github.base_ref}}
         uses: ad-m/github-push-action@v0.8.0
         with:
