@@ -21,7 +21,7 @@ public class FlakyRunReportingMavenExtension extends AbstractMavenLifecycleParti
 
     @Override
     public void afterSessionEnd(MavenSession session) {
-        logger.debug("Flaky run reporter started");
+        logger.info("Flaky run reporter started");
 
         var projects = getProjectsFromMvnSession(session);
         if (!projects.isEmpty()) {
