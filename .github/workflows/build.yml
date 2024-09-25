@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test this PR
 
 on:
   push:
@@ -44,7 +44,16 @@ jobs:
         key: maven-repo-${{ steps.get-date.outputs.date }}
 
     - name: Build with Maven
-      run: mvn -B formatter:validate verify --file pom.xml
+      run: mvn -B formatter:validate clean install -DskipTests -DskipITs --file pom.xml
+
+    - name: Find and store Maven home
+      id: maven-home-discovery
+      run: echo "detected-mvn-home=$(mvn -v | grep 'Maven home:' | sed -e 's|Maven home:| |' | xargs)" >> "$GITHUB_OUTPUT"
+
+    - name: Run tests
+      run: mvn clean verify
+      env:
+        MAVEN_HOME: ${{ steps.maven-home-discovery.outputs.detected-mvn-home }}
 
     - name: Delete Artifacts From Cache
       shell: bash

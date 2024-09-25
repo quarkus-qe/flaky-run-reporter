@@ -19,16 +19,27 @@ public class FlakyRunReportingMavenExtension extends AbstractMavenLifecycleParti
 
     @Override
     public void afterSessionEnd(MavenSession session) {
+        logger.debug("Flaky run reporter started");
+
         var projects = getProjectsFromMvnSession(session);
         if (!projects.isEmpty()) {
             new FlakyRunReporter(logger).createReport(projects);
+        } else {
+            logger.info("No projects found in this Maven session, won't generate Flaky Run report");
         }
     }
 
     private static List<Project> getProjectsFromMvnSession(MavenSession session) {
         final Path rootPath = Path.of("").toAbsolutePath();
+
+        // for multi-module projects, we don't inspect project root, because there are no tests
+        // but for single-module project we should just check 'target' of that project
+        boolean isNotMultiModuleProject = session.getResult().getTopologicallySortedProjects().size() == 1;
+
         return session.getResult().getTopologicallySortedProjects().stream()
-                .map(p -> new Project(p.getName(), rootPath.relativize(p.getBasedir().toPath())))
-                .filter(p -> !p.baseDir().toString().isEmpty()).toList();
+                .map(p -> new Project(p.getName(), rootPath.relativize(p.getBasedir().toPath()))).filter(p -> {
+                    var rootProject = !p.baseDir().toString().isEmpty();
+                    return isNotMultiModuleProject || rootProject;
+                }).toList();
     }
 }

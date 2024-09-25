@@ -20,6 +20,10 @@
         <formatter-maven-plugin.version>2.24.1</formatter-maven-plugin.version>
         <!-- Format Settings -->
         <src.format.goal>format</src.format.goal>
+        <!-- Test Settings -->
+        <junit.jupiter.version>5.11.0</junit.jupiter.version>
+        <maven-invoker.version>3.3.0</maven-invoker.version>
+        <maven.surefire.version>3.5.0</maven.surefire.version>
     </properties>
 
     <dependencies>
@@ -43,6 +47,18 @@
             <artifactId>surefire-report-parser</artifactId>
             <version>${maven-surefire-report-parser.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-invoker</artifactId>
+            <version>${maven-invoker.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -50,6 +66,8 @@
             <plugin>
                 <groupId>org.codehaus.plexus</groupId>
                 <artifactId>plexus-component-metadata</artifactId>
+                <!-- FIXME: replace this deprecated dependency -->
+                <version>2.2.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -71,6 +89,19 @@
                 </executions>
                 <configuration>
                     <lineEnding>LF</lineEnding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- so that we test same setup (deps) and self in the Maven Invoker test -->
+                        <junit.jupiter.version>${junit.jupiter.version}</junit.jupiter.version>
+                        <maven.surefire.version>${maven.surefire.version}</maven.surefire.version>
+                        <flaky-run-reporter.version>${project.version}</flaky-run-reporter.version>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
