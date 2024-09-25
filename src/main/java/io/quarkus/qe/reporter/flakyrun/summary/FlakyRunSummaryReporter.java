@@ -20,17 +20,18 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.groupingBy;
 
 public class FlakyRunSummaryReporter {
+    public static final String TEST_BASE_DIR = FlakyRunSummaryReporter.class.getSimpleName() + ".test-base-dir";
     public static final String FLAKY_SUMMARY_REPORT = "flaky-summary-report.json";
+    public static final String CI_BUILD_NUMBER = "flaky-report-ci-build-number";
+    public static final String DAY_RETENTION = "day-retention";
     private static final Path CURRENT_DIR = Path.of(".");
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    private static final String DAY_RETENTION = "day-retention";
     private static final String MAX_FLAKES_PER_TEST = "max-flakes-per-test";
     private static final String PREVIOUS_SUMMARY_REPORT_PATH = "previous-summary-report-path";
     private static final String NEW_SUMMARY_REPORT_PATH = "new-summary-report-path";
     private static final String NEW_FLAKY_REPORT_PATH = "new-flaky-report-path";
     private static final String EQUALS = "=";
     private static final String CI_JOB_NAME = "flaky-report-ci-job-name";
-    private static final String CI_BUILD_NUMBER = "flaky-report-ci-build-number";
     private final int dayRetention;
     private final int maxFlakesPerTest;
     private final Path newBuildReportPath;
@@ -42,9 +43,15 @@ public class FlakyRunSummaryReporter {
     public FlakyRunSummaryReporter(String[] args) {
         int dayRetention = 30;
         int maxFlakesPerTest = 50;
-        Path newBuildReportPath = CURRENT_DIR.resolve(FlakyRunReporter.FLAKY_RUN_REPORT);
-        Path previousSummaryReportPath = CURRENT_DIR.resolve(FLAKY_SUMMARY_REPORT);
-        Path newSummaryReportPath = CURRENT_DIR.resolve(FLAKY_SUMMARY_REPORT);
+        final Path baseDir;
+        if (System.getProperty(TEST_BASE_DIR) != null) {
+            baseDir = Path.of(System.getProperty(TEST_BASE_DIR));
+        } else {
+            baseDir = CURRENT_DIR;
+        }
+        Path newBuildReportPath = baseDir.resolve(FlakyRunReporter.FLAKY_RUN_REPORT);
+        Path previousSummaryReportPath = baseDir.resolve(FLAKY_SUMMARY_REPORT);
+        Path newSummaryReportPath = baseDir.resolve(FLAKY_SUMMARY_REPORT);
         String ciJobName = "";
         int ciJobBuildNumber = -1;
         for (String arg : args) {
