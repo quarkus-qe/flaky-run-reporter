@@ -30,6 +30,7 @@ import static io.quarkus.qe.reporter.flakyrun.reporter.FlakyRunReporter.FLAKY_RU
 import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.CI_BUILD_NUMBER;
 import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.DAY_RETENTION;
 import static io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter.FLAKY_SUMMARY_REPORT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -65,6 +66,12 @@ public class FlakyRunReportTest {
         var testTarget = getFlakyRunReportFile().toPath().getParent();
         System.setProperty(CreateGhPrComment.TEST_BASE_DIR, testTarget.toString());
 
+        // prepare PR Number
+        var prNumberFile = new File("src/test/resources/pr-number");
+        var prNumberFileInTestTarget = new File(TARGET_FLAKY_TEST_DIR, "target/" + prNumberFile.getName());
+        FileUtils.copyFile(prNumberFile, prNumberFileInTestTarget);
+        assertEquals("8888", readFile(prNumberFileInTestTarget.toPath()));
+
         // prepare overview
         var overview = new File("src/test/resources/overview_file.txt");
         var overviewInTestTarget = new File(TARGET_FLAKY_TEST_DIR, "target/" + overview.getName());
@@ -73,27 +80,32 @@ public class FlakyRunReportTest {
 
         // prepare flaky run reports
         var expectedReportPrefix = "flaky-run-report-";
-        var newFlakyRunReportFile1 = testTarget.resolve(expectedReportPrefix + "whatever-1").toFile();
-        var newFlakyRunReportFile2 = testTarget.resolve(expectedReportPrefix + "whatever-2").toFile();
+        var newFlakyRunReportFile1 = testTarget.resolve(expectedReportPrefix + "linux-jvm-latest.json").toFile();
+        var newFlakyRunReportFile2 = testTarget.resolve(expectedReportPrefix + "linux-native-latest.json").toFile();
+        var newFlakyRunReportFile3 = testTarget.resolve(expectedReportPrefix + "windows-jvm-latest.json").toFile();
         FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile1);
         FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile2);
+        FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile3);
 
         // prepare comment
-        var commentator = new CreateGhPrComment(createCommandArgs(OVERVIEW_FILE_KEY, overview.getName(),
-                FLAKY_REPORTS_FILE_PREFIX_KEY, expectedReportPrefix));
+        var args = createCommandArgs(OVERVIEW_FILE_KEY, overview.getName(), FLAKY_REPORTS_FILE_PREFIX_KEY,
+                expectedReportPrefix);
+        var commentator = new CreateGhPrComment(args, "quarkus-qe/quarkus-test-suite", "1234567890");
         var comment = commentator.getComment();
 
         // assert comment
-        assertTrue(
-                comment.contains(
-                        "Artifact `%s` contains following failures:".formatted(newFlakyRunReportFile1.getName())),
+        assertTrue(comment.contains("Following jobs contain at least one flaky test"), comment);
+        assertTrue(comment.contains(" * PR - Windows - JVM build - Latest Version"), comment);
+        assertTrue(comment.contains(" * PR - Linux - Native build - Latest Version"), comment);
+        assertTrue(comment.contains(" * PR - Linux - JVM build - Latest Version"), comment);
+        assertTrue(comment.contains(
+                "Run summary: https://github.com/quarkus-qe/quarkus-test-suite/actions/runs/1234567890?pr=8888"),
                 comment);
-        assertTrue(
-                comment.contains(
-                        "Artifact `%s` contains following failures:".formatted(newFlakyRunReportFile2.getName())),
-                comment);
-        assertTrue(comment.contains("Failure message: `failing to test flakiness reporting`"), comment);
-        assertTrue(comment.contains("Failure stacktrace:"), comment);
+        assertTrue(comment.contains("**`io.quarkus.qe.reporter.flakyrun.FlakyTest.testFlaky`**"), comment);
+        assertTrue(comment.contains(" - Failure message: `failing to test flakiness reporting`"), comment);
+        assertTrue(comment.contains("   - PR - Windows - JVM build - Latest Version"), comment);
+        assertTrue(comment.contains("   - PR - Linux - JVM build - Latest Version"), comment);
+        assertTrue(comment.contains("   - PR - Linux - Native build - Latest Version"), comment);
         assertTrue(comment.contains("org.opentest4j.AssertionFailedError: failing to test flakiness reporting"),
                 comment);
     }
