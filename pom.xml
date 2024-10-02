@@ -17,7 +17,7 @@
         <maven-core.version>3.9.9</maven-core.version>
         <maven-surefire-report-parser.version>3.5.0</maven-surefire-report-parser.version>
         <plexus-containers.version>2.2.0</plexus-containers.version>
-        <jackson-databind.version>2.17.0</jackson-databind.version>
+        <jackson-databind.version>2.18.0</jackson-databind.version>
         <formatter-maven-plugin.version>2.24.1</formatter-maven-plugin.version>
         <!-- Format Settings -->
         <src.format.goal>format</src.format.goal>
