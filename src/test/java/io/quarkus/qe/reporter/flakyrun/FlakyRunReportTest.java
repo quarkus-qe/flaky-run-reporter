@@ -9,7 +9,6 @@ import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.apache.maven.shared.invoker.PrintStreamHandler;
 import org.apache.maven.shared.invoker.SystemOutHandler;
 import org.codehaus.plexus.util.FileUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -47,7 +46,7 @@ public class FlakyRunReportTest {
         var invoker = new DefaultInvoker();
         FileUtils.copyDirectoryStructure(TEMPLATE_FLAKY_TEST_DIR, TARGET_FLAKY_TEST_DIR);
         invoker.setWorkingDirectory(TARGET_FLAKY_TEST_DIR);
-        invoker.setMavenHome(getMavenHome());
+        invoker.setMavenExecutable(getMavenWrapper());
         try (var request = mvnCleanTestRequest()) {
             invoker.execute(request.delegate);
             var runLogs = request.outputStream.toString();
@@ -155,10 +154,13 @@ public class FlakyRunReportTest {
         assertTrue(reportContent.contains(expectedPortion), reportContent);
     }
 
-    private static File getMavenHome() {
-        var mvnHome = System.getenv("MAVEN_HOME");
-        Objects.requireNonNull(mvnHome, "Environment variable 'MAVEN_HOME' is required");
-        return new File(mvnHome);
+    private static File getMavenWrapper() {
+        var mvnHome = System.getProperty("basedir");
+        Objects.requireNonNull(mvnHome, "System property 'basedir' is required");
+        if (!mvnHome.endsWith(File.separator)) {
+            mvnHome += File.separator;
+        }
+        return new File(mvnHome + "mvnw");
     }
 
     private static CloseableRequest mvnCleanTestRequest() {
