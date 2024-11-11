@@ -16,9 +16,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-core.version>3.9.9</maven-core.version>
         <maven-surefire-report-parser.version>3.5.2</maven-surefire-report-parser.version>
-        <plexus-containers.version>2.2.0</plexus-containers.version>
         <jackson-databind.version>2.18.1</jackson-databind.version>
         <formatter-maven-plugin.version>2.24.1</formatter-maven-plugin.version>
+        <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
+        <!-- Maven Enforcer Settings -->
+        <maven.min.version>3.9.6</maven.min.version>
+        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.phase>validate</maven-enforcer-plugin.phase>
         <!-- Format Settings -->
         <src.format.goal>format</src.format.goal>
         <!-- Test Settings -->
@@ -32,11 +36,7 @@
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
             <version>${maven-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-component-annotations</artifactId>
-            <version>${plexus-containers.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -64,15 +64,41 @@
 
     <build>
         <plugins>
+            <!-- Check for the minimum Maven version. Runs during the validate phase. -->
             <plugin>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-component-metadata</artifactId>
-                <!-- FIXME: replace this deprecated dependency -->
-                <version>2.2.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>enforce</id>
+                        <phase>${maven-enforcer-plugin.phase}</phase>
                         <goals>
-                            <goal>generate-metadata</goal>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <message>To use this project, Maven ${maven.min.version} (or greater) is required.
+                                        Please install it.
+                                    </message>
+                                    <version>${maven.min.version}</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.sisu</groupId>
+                <artifactId>sisu-maven-plugin</artifactId>
+                <version>${sisu-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-index</id>
+                        <goals>
+                            <goal>main-index</goal>
+                            <goal>test-index</goal>
                         </goals>
                     </execution>
                 </executions>

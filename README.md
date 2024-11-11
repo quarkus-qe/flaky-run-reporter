@@ -1,6 +1,10 @@
 # Quarkus QE Flaky Run Reporter
 This is Maven extensions that accepts SureFire / FailSafe reports and creates flaky run reports.
 
+## Minimum project requirements
+
+Requires Maven 3.9.6 or newer.
+
 ## Generate flaky run report
 Add Maven extension to your POM file:
 
