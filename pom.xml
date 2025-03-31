@@ -28,7 +28,7 @@
         <!-- Test Settings -->
         <junit.jupiter.version>5.12.1</junit.jupiter.version>
         <maven-invoker.version>3.3.0</maven-invoker.version>
-        <maven.surefire.version>3.5.2</maven.surefire.version>
+        <maven.surefire.version>3.5.3</maven.surefire.version>
     </properties>
 
     <dependencies>
