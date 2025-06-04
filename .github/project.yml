@@ -1,4 +1,4 @@
-name: Quarkus QE Test Framework
+name: Flaky Run Reporter
 release:
-  current-version: 0.1.5
-  next-version: 0.1.6
+  current-version: 0.1.6
+  next-version: 0.1.7
