@@ -82,9 +82,17 @@ public class FlakyRunReportTest {
         var newFlakyRunReportFile1 = testTarget.resolve(expectedReportPrefix + "linux-jvm-latest.json").toFile();
         var newFlakyRunReportFile2 = testTarget.resolve(expectedReportPrefix + "linux-native-latest.json").toFile();
         var newFlakyRunReportFile3 = testTarget.resolve(expectedReportPrefix + "windows-jvm-latest.json").toFile();
+        var newFlakyRunReportFile4 = testTarget.resolve(expectedReportPrefix + "linux-build-jvm-latest.json").toFile();
+        var newFlakyRunReportFile5 = testTarget.resolve(expectedReportPrefix + "windows-build-jvm-latest.json")
+                .toFile();
+        var newFlakyRunReportFile6 = testTarget.resolve(expectedReportPrefix + "linux-build-native-latest.json")
+                .toFile();
         FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile1);
         FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile2);
         FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile3);
+        FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile4);
+        FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile5);
+        FileUtils.copyFile(getFlakyRunReportFile(), newFlakyRunReportFile6);
 
         // prepare comment
         var args = createCommandArgs(OVERVIEW_FILE_KEY, overview.getName(), FLAKY_REPORTS_FILE_PREFIX_KEY,
@@ -97,6 +105,9 @@ public class FlakyRunReportTest {
         assertTrue(comment.contains(" * PR - Windows - JVM build - Latest Version"), comment);
         assertTrue(comment.contains(" * PR - Linux - Native build - Latest Version"), comment);
         assertTrue(comment.contains(" * PR - Linux - JVM build - Latest Version"), comment);
+        assertTrue(comment.contains(" * Linux JVM"), comment);
+        assertTrue(comment.contains(" * Windows JVM"), comment);
+        assertTrue(comment.contains(" * Linux Native"), comment);
         assertTrue(comment.contains(
                 "Run summary: https://github.com/quarkus-qe/quarkus-test-suite/actions/runs/1234567890?pr=8888"),
                 comment);
@@ -105,6 +116,9 @@ public class FlakyRunReportTest {
         assertTrue(comment.contains("   - PR - Windows - JVM build - Latest Version"), comment);
         assertTrue(comment.contains("   - PR - Linux - JVM build - Latest Version"), comment);
         assertTrue(comment.contains("   - PR - Linux - Native build - Latest Version"), comment);
+        assertTrue(comment.contains("   - Linux JVM"), comment);
+        assertTrue(comment.contains("   - Windows JVM"), comment);
+        assertTrue(comment.contains("   - Linux Native"), comment);
         assertTrue(comment.contains("org.opentest4j.AssertionFailedError: failing to test flakiness reporting"),
                 comment);
     }
