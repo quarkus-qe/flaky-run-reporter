@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.quarkus.qe.reporter.flakyrun.FlakyReporterUtils.getRequiredArgument;
@@ -151,10 +152,21 @@ public final class CreateGhPrComment {
     private static String toJobName(String fileName, Set<String> jobs) {
         // this can be heavily simplified and made more precise
         // by changing format we receive
-        // right now we receive something like:
+        // so the obvious intersection were the last 3 words
+        // now we receive something like: Linux JVM and the filename is 'linux-build-jvm-latest'
+        // so we could just match 'Linux' and 'JVM' parts, but it's more reliable to have job name to filename list
+
+        var jobFileToJobName = getJobFileToJobName(jobs);
+        var jobName = jobFileToJobName.entrySet().stream().filter(e -> fileName.endsWith(e.getKey()))
+                .map(Map.Entry::getValue).findFirst().orElse(null);
+        if (jobName != null) {
+            return jobName;
+        }
+
+        // fallback, probably not used anymore, but keeping it to make this job name resolution bit more resilient
+        // previously we received something like:
         // PR - Linux - JVM build - Latest Version
         // flaky-run-report-linux-jvm-latest.json
-        // so the obvious intersection are the last 3 words
         var words = fileName.transform(fn -> {
             // drop .json
             if (fn.endsWith(".json")) {
@@ -165,8 +177,9 @@ public final class CreateGhPrComment {
         if (words.length > 3) {
             var last3Words = Arrays.stream(words).skip(words.length - 3).map(String::toLowerCase)
                     .collect(Collectors.toSet());
-            var jobName = jobs.stream().filter(job -> last3Words.stream().allMatch(w -> job.toLowerCase().contains(w)))
-                    .findFirst().orElse(null);
+            jobName = jobs.stream().filter(job -> last3Words.stream().allMatch(job.toLowerCase()::contains)).findFirst()
+                    .orElse(null);
+
             if (jobName != null) {
                 return jobName.trim();
             }
@@ -175,6 +188,21 @@ public final class CreateGhPrComment {
         // fallback to the filename
         System.out.println("Unknown format for flaky report filename: " + fileName);
         return fileName;
+    }
+
+    private static Map<String, String> getJobFileToJobName(Set<String> jobs) {
+        return jobs.stream().map(jobName -> {
+            if ("Linux JVM".equalsIgnoreCase(jobName)) {
+                return Map.entry("linux-build-jvm-latest.json", "Linux JVM");
+            }
+            if ("Windows JVM".equalsIgnoreCase(jobName)) {
+                return Map.entry("windows-build-jvm-latest.json", "Windows JVM");
+            }
+            if ("Linux Native".equalsIgnoreCase(jobName)) {
+                return Map.entry("linux-build-native-latest.json", "Linux Native");
+            }
+            return Map.entry(jobName.toLowerCase(), jobName);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private static String getFailureOverview(Set<String> jobs) {
