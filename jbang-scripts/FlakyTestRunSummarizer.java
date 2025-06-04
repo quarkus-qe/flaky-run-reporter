@@ -1,6 +1,6 @@
 //usr/bin/env jbang "$0" "$@" ; exit $?
 
-//DEPS io.quarkus.qe:flaky-run-reporter:0.1.5
+//DEPS io.quarkus.qe:flaky-run-reporter:0.1.6
 
 import io.quarkus.qe.reporter.flakyrun.summary.FlakyRunSummaryReporter;
 
