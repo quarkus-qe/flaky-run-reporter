@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-core.version>3.9.11</maven-core.version>
         <maven-surefire-report-parser.version>3.5.3</maven-surefire-report-parser.version>
-        <jackson-databind.version>2.19.1</jackson-databind.version>
+        <jackson-databind.version>2.19.2</jackson-databind.version>
         <formatter-maven-plugin.version>2.27.0</formatter-maven-plugin.version>
         <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
         <!-- Maven Enforcer Settings -->
