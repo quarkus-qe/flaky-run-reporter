@@ -5,7 +5,7 @@
     <groupId>io.quarkus.qe</groupId>
     <artifactId>flaky-run-reporter</artifactId>
     <name>Flaky Run Reporter - Maven Extension</name>
-    <version>0.1.7-SNAPSHOT</version>
+    <version>0.1.7</version>
     <packaging>jar</packaging>
     <description>Creates report on flaky tests detected during SureFire and FailSafe test runs</description>
 
@@ -233,7 +233,7 @@
         <connection>scm:git:git@github.com:quarkus-qe/flaky-run-reporter.git</connection>
         <developerConnection>scm:git:git@github.com:quarkus-qe/flaky-run-reporter.git</developerConnection>
         <url>https://github.com/quarkus-qe/flaky-run-reporter</url>
-        <tag>HEAD</tag>
+        <tag>0.1.7</tag>
     </scm>
     <url>https://github.com/quarkus-qe/flaky-run-reporter/</url>
 
